@@ -1,0 +1,28 @@
+# Google App Engine Configuration (Standard Environment)
+runtime: nodejs22
+instance_class: F1
+
+handlers:
+  # Serve static files from dist directory with long cache
+  - url: /(.*\.(js|css|png|jpg|svg|ico|woff2?|json))$
+    static_files: dist/\1
+    upload: dist/(.*\.(js|css|png|jpg|svg|ico|woff2?|json))$
+    secure: always
+    http_headers:
+      X-Frame-Options: "SAMEORIGIN"
+      X-Content-Type-Options: "nosniff"
+      Cache-Control: "public, max-age=2592000"
+
+  # Fallback: All other URLs route to index.html for Single Page App client-side routing
+  - url: /.*
+    static_files: dist/index.html
+    upload: dist/index.html
+    secure: always
+    http_headers:
+      X-Frame-Options: "SAMEORIGIN"
+      X-Content-Type-Options: "nosniff"
+      Cache-Control: "no-cache, must-revalidate"
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 2
