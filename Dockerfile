@@ -1,31 +1,31 @@
-# ==========================================
-# Multi-stage Dockerfile for Google Cloud Run
-# ==========================================
-
-# Stage 1: Build static assets with Node.js
+# Stage 1: Build static assets
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install dependencies with clean cache
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-# Copy source code and build
 COPY . .
 RUN npm run build
 
-# Stage 2: Serve production assets with Nginx
+# Stage 2: Production Nginx Server
 FROM nginx:alpine-slim
-
-# Copy custom Nginx template for Cloud Run
-COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copy built frontend assets
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Cloud Run injects the PORT environment variable (default: 8080)
+# Generate self-contained Nginx config directly in container
+RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
+    echo '    listen 8080;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '}' >> /etc/nginx/conf.d/default.conf
+
 ENV PORT=8080
 EXPOSE 8080
 
-# Nginx 1.19+ docker image will automatically substitute ${PORT} from template
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "-c", "sed -i \"s/listen 8080;/listen ${PORT};/g\" /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
