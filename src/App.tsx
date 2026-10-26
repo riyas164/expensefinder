@@ -22,8 +22,7 @@ import { FinancialCharts } from './components/FinancialCharts';
 import { 
   ExpenseModal, 
   IncomeModal, 
-  DeleteConfirmModal, 
-  SupabaseConfigModal 
+  DeleteConfirmModal 
 } from './components/TransactionModals';
 import { 
   Wallet, 
@@ -32,7 +31,6 @@ import {
   Calendar, 
   Plus, 
   Search, 
-  Database, 
   CheckCircle, 
   AlertCircle, 
   Edit3, 
@@ -57,7 +55,6 @@ export default function App() {
   const [editingIncome, setEditingIncome] = useState<IncomeItem | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
-  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState(false);
 
   // Toast notifications
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -334,14 +331,6 @@ export default function App() {
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Expense</span>
-            </button>
-
-            <button
-              onClick={() => setIsSupabaseModalOpen(true)}
-              className="p-2 rounded-xl bg-[#17192a] hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs flex items-center gap-1.5 transition cursor-pointer"
-              title="Database Settings"
-            >
-              <Database className="w-4 h-4 text-violet-400" />
             </button>
           </div>
 
@@ -787,13 +776,8 @@ export default function App() {
             <span>Personal Financial Management</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSupabaseModalOpen(true)}
-              className="hover:text-white transition cursor-pointer text-violet-400"
-            >
-              Database Settings
-            </button>
+          <div className="text-slate-500 text-[11px]">
+            <span>All data secured & stored</span>
           </div>
         </div>
       </footer>
@@ -825,11 +809,6 @@ export default function App() {
         onConfirm={handleConfirmDelete}
         title={`Delete ${deleteTarget?.type === 'expense' ? 'Expense' : 'Income'}?`}
         itemDescription={deleteTarget?.description || ''}
-      />
-
-      <SupabaseConfigModal
-        isOpen={isSupabaseModalOpen}
-        onClose={() => setIsSupabaseModalOpen(false)}
       />
 
     </div>
